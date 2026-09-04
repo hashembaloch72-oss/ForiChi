@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>ForiChi | خدمات محلی</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #0f172a;
+      --primary-2: #1e293b;
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #15803d;
+    }
+
+    body {
+      font-family: Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 88px;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .header {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      padding: 22px 18px 28px;
+      border-radius: 0 0 26px 26px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: -.5px;
+    }
+
+    .logo span {
+      color: #60a5fa;
+    }
+
+    .city-btn {
+      background: rgba(255,255,255,.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 12px;
+      padding: 9px 13px;
+      font-size: 13px;
+    }
+
+    .hero-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .hero-text {
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .search {
+      margin-top: 18px;
+      background: white;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      padding: 5px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    }
+
+    .search input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      padding: 12px;
+      font-size: 14px;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .search button {
+      background: var(--accent);
+      color: white;
+      border-radius: 11px;
+      padding: 11px 15px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: auto;
+      padding: 20px 16px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .back {
+      display: none;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 8px 13px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .category {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      padding: 17px;
+      text-align: right;
+      transition: .2s;
+      min-height: 105px;
+    }
+
+    .category:active {
+      transform: scale(.98);
+    }
+
+    .category-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--accent-light);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .category-title {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .category-count {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .subcategories {
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .subcategory {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: right;
+    }
+
+    .subcategory-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .subcategory-desc {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 5px;
+    }
+
+    .arrow {
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .services {
+      display: none;
+      gap: 12px;
+    }
+
+    .service {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .service-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .service-name {
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .service-specialist {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
+    .verified {
+      color: var(--success);
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    .service-action {
+      margin-top: 14px;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border-radius: 11px;
+      padding: 11px;
+      font-size: 13px;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 35px 10px;
+      font-size: 13px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      height: 76px;
+      background: rgba(255,255,255,.96);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .nav-item {
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 8px 15px;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .nav-icon {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    @media (min-width: 600px) {
+      .categories {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="top">
+    <div class="logo">Fori<span>Chi</span></div>
+    <button class="city-btn" onclick="changeCity()">چابهار</button>
+  </div>
+
+  <div class="hero-title">خدمات مورد نیازت را پیدا کن</div>
+  <div class="hero-text">
+    متخصصان و خدمات محلی را سریع و ساده پیدا کن.
+  </div>
+
+  <div class="search">
+    <input id="searchInput" type="text" placeholder="جستجوی خدمت یا متخصص...">
+    <button onclick="searchServices()">جستجو</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="section-head">
+    <h2 id="pageTitle" class="section-title">دسته‌بندی خدمات</h2>
+    <button id="backBtn" class="back" onclick="goBack()">بازگشت</button>
+  </div>
+
+  <div id="categories" class="categories"></div>
+
+  <div id="subcategories" class="subcategories"></div>
+
+  <div id="services" class="services"></div>
+
+</main>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showHome()">
+    <span class="nav-icon">⌂</span>
+    خانه
+  </button>
+
+  <button class="nav-item" onclick="focusSearch()">
+    <span class="nav-icon">⌕</span>
+    جستجو
+  </button>
+
+  <button class="nav-item" onclick="registerService()">
+    <span class="nav-icon">+</span>
+    ثبت خدمت
+  </button>
+
+  <button class="nav-item" onclick="profile()">
+    <span class="nav-icon">○</span>
+    حساب
+  </button>
+</nav>
+
+<script>
+const data = {
+  "تعمیرات": {
+    icon: "01",
+    subs: {
+      "تعمیر موبایل": ["تعمیرکار موبایل", "تعویض صفحه، باتری و قطعات"],
+      "تعمیر لپ‌تاپ": ["تعمیرکار لپ‌تاپ", "نرم‌افزار، سخت‌افزار و قطعات"],
+      "تعمیر لوازم خانگی": ["تعمیرکار لوازم خانگی", "تعمیر یخچال، لباسشویی و کولر"]
+    }
+  },
+
+  "حمل‌ونقل": {
+    icon: "02",
+    subs: {
+      "پیک موتوری": ["پیک موتوری", "ارسال سریع داخل شهر"],
+      "وانت و باربری": ["خدمات حمل بار", "حمل اثاث و کالا"],
+      "خودرو": ["خدمات خودرو", "راننده و خدمات جابه‌جایی"]
+    }
+  },
+
+  "فناوری": {
+    icon: "03",
+    subs: {
+      "خدمات کامپیوتری": ["متخصص کامپیوتر", "نصب، تعمیر و پشتیبانی"],
+      "طراحی سایت": ["طراح سایت", "طراحی و توسعه وب"],
+      "شبکه": ["متخصص شبکه", "راه‌اندازی و پشتیبانی شبکه"]
+    }
+  },
+
+  "چاپ و تبلیغات": {
+    icon: "04",
+    subs: {
+      "چاپ": ["چاپخانه", "چاپ کارت، بنر و تراکت"],
+      "طراحی گرافیک": ["طراح گرافیک", "لوگو و محتوای تبلیغاتی"],
+      "تبلیغات": ["خدمات تبلیغاتی", "تبلیغات محلی و آنلاین"]
+    }
+  },
+
+  "خدمات منزل": {
+    icon: "05",
+    subs: {
+      "نظافت": ["نیروی خدماتی", "نظافت منزل و محل کار"],
+      "تأسیسات": ["تأسیسات‌کار", "لوله‌کشی و تعمیرات"],
+      "کولر و تهویه": ["تعمیرکار کولر", "سرویس و تعمیر کولر"]
+    }
+  },
+
+  "ساختمان": {
+    icon: "06",
+    subs: {
+      "بنا و کارگر": ["نیروی ساختمانی", "کارگر و استادکار"],
+      "برق‌کاری": ["برق‌کار", "تأسیسات برق ساختمان"],
+      "نقاشی ساختمان": ["نقاش ساختمان", "رنگ‌آمیزی و بازسازی"]
+    }
+  },
+
+  "زیبایی": {
+    icon: "07",
+    subs: {
+      "آرایشگری": ["آرایشگر", "خدمات آرایش و پیرایش"],
+      "مراقبت پوست": ["متخصص پوست و زیبایی", "خدمات مراقبت پوست"]
+    }
+  },
+
+  "آموزش": {
+    icon: "08",
+    subs: {
+      "آموزش خصوصی": ["مدرس خصوصی", "دروس مدرسه و دانشگاه"],
+      "کامپیوتر": ["مدرس کامپیوتر", "آموزش مهارت‌های دیجیتال"]
+    }
+  }
+};
+
+let currentCategory = null;
+let currentSub = null;
+
+function renderCategories() {
+  const box = document.getElementById("categories");
+  box.innerHTML = "";
+
+  Object.keys(data).forEach(name => {
+    const item = data[name];
+
+    const button = document.createElement("button");
+    button.className = "category";
+
+    button.innerHTML = `
+      <div class="category-icon">${item.icon}</div>
+      <div class="category-title">${name}</div>
+      <div class="category-count">${Object.keys(item.subs).length} زیرمجموعه</div>
+    `;
+
+    button.onclick = () => openCategory(name);
+    box.appendChild(button);
+  });
+
+  document.getElementById("categories").style.display = "grid";
+  document.getElementById("subcategories").style.display = "none";
+  document.getElementById("services").style.display = "none";
+  document.getElementById("backBtn").style.display = "none";
+  document.getElementById("pageTitle").textContent = "دسته‌بندی خدمات";
+}
+
+function openCategory(name) {
+  currentCategory = name;
+  currentSub = null;
+
+  const box = document.getElementById("subcategories");
+  box.innerHTML = "";
+
+  Object.keys(data[name].subs).forEach(sub => {
+    const info = data[name].subs[sub];
+
+    const button = document.createElement("button");
+    button.className = "subcategory";
+
+    button.innerHTML = `
+      <div>
+        <div class="subcategory-title">${sub}</div>
+        <div class="subcategory-desc">${info[1]}</div>
+      </div>
+      <div class="arrow">‹</div>
+    `;
+
+    button.onclick = () => openServices(sub);
+    box.appendChild(button);
+  });
+
+  document.getElementById("categories").style.display = "none";
+  box.style.display = "grid";
+  document.getElementById("services").style.display = "none";
+  document.getElementById("backBtn").style.display = "block";
+  document.getElementById("pageTitle").textContent = name;
+}
+
+function openServices(sub) {
+  currentSub = sub;
+
+  const box = document.getElementById("services");
+  box.innerHTML = "";
+
+  const specialist = data[currentCategory].subs[sub][0];
+
+  for (let i = 1; i <= 3; i++) {
+    const item = document.createElement("div");
+    item.className = "service";
+
+    item.innerHTML = `
+      <div class="service-top">
+        <div>
+          <div class="service-name">${specialist} ${i}</div>
+          <div class="service-specialist">${data[currentCategory].subs[sub][1]}</div>
+          <div class="verified">متخصص ثبت‌شده</div>
+        </div>
+      </div>
+      <button class="service-action" onclick="requestService('${sub}', ${i})">
+        درخواست خدمت
+      </button>
+    `;
+
+    box.appendChild(item);
+  }
+
+  document.getElementById("categories").style.display = "none";
+  document.getElementById("subcategories").style.display = "none";
+  box.style.display = "grid";
+  box.style.gridTemplateColumns = "1fr";
+  document.getElementById("pageTitle").textContent = sub;
+}
+
+function goBack() {
+  if (currentSub) {
+    openCategory(currentCategory);
+  } else {
+    renderCategories();
+  }
+}
+
+function showHome() {
+  currentCategory = null;
+  currentSub = null;
+  renderCategories();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function focusSearch() {
+  document.getElementById("searchInput").focus();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function searchServices() {
+  const query = document.getElementById("searchInput").value.trim();
+
+  if (!query) {
+    alert("عبارت مورد نظر را وارد کنید.");
+    return;
+  }
+
+  const results = [];
+
+  Object.keys(data).forEach(category => {
+    Object.keys(data[category].subs).forEach(sub => {
+      if (
+        sub.includes(query) ||
+        category.includes(query)
+      ) {
+        results.push([category, sub]);
+      }
+    });
+  });
+
+  if (!results.length) {
+    alert("خدمتی با این عبارت پیدا نشد.");
+    return;
+  }
+
+  const first = results[0];
+  openCategory(first[0]);
+}
+
+function requestService(sub, number) {
+  alert(
+    "درخواست شما برای «" +
+    sub +
+    "» ثبت آزمایشی شد.\\n\\n" +
+    "در مرحله بعد این بخش به Backend و سیستم سفارش ForiChi متصل می‌شود."
+  );
+}
+
+function changeCity() {
+  const city = prompt("شهر مورد نظر را وارد کنید:", "چابهار");
+
+  if (city) {
+    document.querySelector(".city-btn").textContent = city;
+  }
+}
+
+function registerService() {
+  alert("بخش ثبت خدمت در مرحله بعد به فرم ثبت متخصص متصل می‌شود.");
+}
+
+function profile() {
+  alert("بخش حساب کاربری در مرحله بعد فعال می‌شود.");
+}
+
+renderCategories();
+</script>
+
+</body>
+</html>
