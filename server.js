@@ -32,9 +32,10 @@ if (SUPABASE_URL && SUPABASE_KEY) {
 
 app.get("/api/env-status", (req, res) => {
     res.json({
-        supabase_url: !!process.env.SUPABASE_URL,
-        supabase_key: !!process.env.SUPABASE_KEY,
-        supabase_client: !!supabase
+        supabase_url: Boolean(process.env.SUPABASE_URL),
+        supabase_key: Boolean(process.env.SUPABASE_KEY),
+        supabase_client: Boolean(supabase),
+        node_env: process.env.NODE_ENV || "not_set"
     });
 });
 
