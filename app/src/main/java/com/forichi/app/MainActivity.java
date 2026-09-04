@@ -10,9 +10,11 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.util.Log;
 import android.widget.*;
 
 import com.forichi.app.screens.*;
+import com.forichi.app.network.ApiClient;
 
 public class MainActivity extends Activity {
 
@@ -89,6 +91,34 @@ public class MainActivity extends Activity {
         });
     }
 
+
+    private static class ApiCallback
+            implements ApiClient.Callback {
+
+        @Override
+        public void onSuccess(String response) {
+            Log.d(
+                    "FORICHI_API",
+                    "SUCCESS: " + response
+            );
+        }
+
+        @Override
+        public void onError(String error) {
+            Log.e(
+                    "FORICHI_API",
+                    "ERROR: " + error
+            );
+        }
+    }
+
+    private void testApiConnection() {
+        ApiClient.get(
+                "/api/health",
+                new ApiCallback()
+        );
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -132,6 +162,7 @@ public class MainActivity extends Activity {
         buildBottom();
 
         setContentView(root);
+        testApiConnection();
     }
 
     void buildHeader() {

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
@@ -109,6 +110,56 @@ app.get("/api/health", async (req, res) => {
     });
 
 });
+
+// ==================================================
+// Services API
+// ==================================================
+
+app.get("/api/services", async (req, res) => {
+
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+
+        const { data, error } = await supabase
+            .from("services")
+            .select("*")
+            .order("id", { ascending: false });
+
+        if (error) {
+            console.error("Services error:", error);
+
+            return res.status(500).json({
+                success: false,
+                message: "Database error",
+                detail: error.message,
+                code: error.code
+            });
+        }
+
+        res.json({
+            success: true,
+            count: data.length,
+            services: data
+        });
+
+    } catch (error) {
+
+        console.error("Services API error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+    }
+});
+
+// ==================================================
 
 // ==================================================
 // Admin status
