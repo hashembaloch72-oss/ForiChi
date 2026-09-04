@@ -27,6 +27,20 @@ if (SUPABASE_URL && SUPABASE_KEY) {
 }
 
 // ==================================================
+// Environment diagnostics (no secrets exposed)
+// ==================================================
+
+app.get("/api/env-status", (req, res) => {
+    res.json({
+        supabase_url: !!process.env.SUPABASE_URL,
+        supabase_key: !!process.env.SUPABASE_KEY,
+        supabase_client: !!supabase
+    });
+});
+
+// ==================================================
+
+// ==================================================
 // Middleware
 // ==================================================
 
