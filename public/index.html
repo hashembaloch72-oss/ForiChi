@@ -526,9 +526,26 @@ async function openServices(sub) {
     document.querySelector(".city-btn").textContent.trim() ||
     "چابهار";
 
+  const categoryMap = {
+    "رستوران": "رستوران",
+    "فست‌فود": "فست‌فود",
+    "سوپرمارکت": "سوپرمارکت",
+    "فروشگاه": "فروشگاه",
+
+    "تعمیر موبایل": "موبایل",
+
+    "چاپ": "چاپ و تبلیغات",
+    "تبلیغات": "چاپ و تبلیغات",
+    "طراحی گرافیک": "چاپ و تبلیغات"
+  };
+
+  const dbCategory = categoryMap[sub] || sub;
+
   try {
     const url =
-      `/api/businesses?city=${encodeURIComponent(city)}&category=${encodeURIComponent(sub)}`;
+      `/api/businesses?city=${encodeURIComponent(city)}&category=${encodeURIComponent(dbCategory)}`;
+
+    console.log("ForiChi API:", url);
 
     const response = await fetch(url);
 
@@ -537,7 +554,6 @@ async function openServices(sub) {
     }
 
     const result = await response.json();
-
     const businesses = result.businesses || [];
 
     box.innerHTML = "";
@@ -546,13 +562,25 @@ async function openServices(sub) {
       box.innerHTML = `
         <div style="text-align:center;padding:35px 20px">
           <div style="font-size:42px">😕</div>
+
           <h3>خدمتی پیدا نشد</h3>
+
           <p>
-            در حال حاضر برای «${sub}» در «${city}»
-            کسب‌وکاری ثبت نشده است.
+            هنوز کسب‌وکاری برای «${sub}»
+            در «${city}» ثبت نشده است.
           </p>
+
+          <div style="
+            margin-top:12px;
+            font-size:12px;
+            opacity:.7;
+            direction:ltr;
+          ">
+            category: ${dbCategory}
+          </div>
         </div>
       `;
+
       return;
     }
 
@@ -562,11 +590,15 @@ async function openServices(sub) {
 
       const phone = business.phone || "";
       const address = business.address || "آدرس ثبت نشده";
-      const description = business.description || business.category || "";
+      const description =
+        business.description ||
+        business.category ||
+        "";
 
       item.innerHTML = `
         <div class="service-top">
           <div style="width:100%">
+
             <div class="service-name">
               ${business.name || "بدون نام"}
             </div>
@@ -592,6 +624,7 @@ async function openServices(sub) {
                 `
                 : ""
             }
+
           </div>
         </div>
 
@@ -608,7 +641,11 @@ async function openServices(sub) {
               <a
                 href="tel:${phone}"
                 class="service-action"
-                style="text-decoration:none;text-align:center;flex:1">
+                style="
+                  text-decoration:none;
+                  text-align:center;
+                  flex:1;
+                ">
                 📞 تماس
               </a>
               `
@@ -636,19 +673,26 @@ async function openServices(sub) {
     });
 
   } catch (error) {
+
     console.error("ForiChi businesses error:", error);
 
     box.innerHTML = `
       <div style="text-align:center;padding:35px 20px">
+
         <div style="font-size:42px">⚠️</div>
+
         <h3>خطا در دریافت خدمات</h3>
-        <p>لطفاً دوباره تلاش کنید.</p>
+
+        <p>
+          اتصال به سرور با مشکل مواجه شد.
+        </p>
 
         <button
           class="service-action"
-          onclick="openServices(${JSON.stringify(sub)})">
+          onclick='openServices(${JSON.stringify(sub)})'>
           🔄 تلاش مجدد
         </button>
+
       </div>
     `;
   }
