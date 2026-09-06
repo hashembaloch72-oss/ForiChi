@@ -1,5 +1,7 @@
 package com.forichi.app.screens;
 
+import android.content.Intent;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.graphics.Color;
@@ -115,7 +117,12 @@ public class SearchActivity extends Activity {
         );
 
         back.setOnClickListener(
-                v -> finish()
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        finish();
+                    }
+                }
         );
 
         ForiTheme.press(back);
@@ -477,9 +484,12 @@ public class SearchActivity extends Activity {
                     public void onError(
                             String error) {
 
-                        runOnUiThread(() ->
-                                showError(error)
-                        );
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showError(error);
+                            }
+                        });
                     }
                 }
         );
@@ -794,7 +804,9 @@ public class SearchActivity extends Activity {
         ForiTheme.press(card);
 
         card.setOnClickListener(
-                v -> {
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
                     Intent intent =
                             new Intent(
@@ -823,6 +835,7 @@ public class SearchActivity extends Activity {
                     );
 
                     startActivity(intent);
+                    }
                 }
         );
 

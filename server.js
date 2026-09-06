@@ -55,6 +55,31 @@ app.use(
 );
 
 // ==================================================
+// Admin authentication
+// ==================================================
+
+function requireAdmin(req, res, next) {
+
+    const key = req.headers["x-admin-key"];
+
+    if (!process.env.FORICHI_ADMIN_KEY) {
+        return res.status(500).json({
+            success: false,
+            message: "Admin key is not configured"
+        });
+    }
+
+    if (!key || key !== process.env.FORICHI_ADMIN_KEY) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    next();
+}
+
+// ==================================================
 // Web
 // ==================================================
 
@@ -322,6 +347,319 @@ app.get("/api/admin/stats", async (req, res) => {
 
             message: "Database error"
 
+        });
+
+    }
+
+});
+
+// ==================================================
+// Admin - Businesses CRUD
+// ==================================================
+
+app.post("/api/admin/businesses", requireAdmin, async (req, res) => {
+
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+
+        const {
+            name,
+            category,
+            description,
+            phone,
+            address,
+            city,
+            image_url,
+            latitude,
+            longitude,
+            is_active
+        } = req.body;
+
+        if (!name || !name.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Business name is required"
+            });
+        }
+
+        const { data, error } = await supabase
+            .from("businesses")
+            .insert([{
+                name: name.trim(),
+                category: category || null,
+                description: description || null,
+                phone: phone || null,
+                address: address || null,
+                city: city || null,
+                image_url: image_url || null,
+                latitude: latitude ?? null,
+                longitude: longitude ?? null,
+                is_active: is_active !== false
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Database error",
+                detail: error.message
+            });
+        }
+
+        res.status(201).json({
+            success: true,
+            business: data
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+
+    }
+
+});
+
+
+app.put("/api/admin/businesses/:id", requireAdmin, async (req, res) => {
+
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+
+        const { id } = req.params;
+
+        const allowed = [
+            "name",
+            "category",
+            "description",
+            "phone",
+            "address",
+            "city",
+            "image_url",
+            "latitude",
+            "longitude",
+            "is_active"
+        ];
+
+        const updates = {};
+
+        for (const field of allowed) {
+            if (req.body[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
+        }
+
+        if (updates.name !== undefined) {
+            if (!String(updates.name).trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Business name cannot be empty"
+                });
+            }
+
+            updates.name = String(updates.name).trim();
+        }
+
+        if (!Object.keys(updates).length) {
+            return res.status(400).json({
+                success: false,
+                message: "No fields to update"
+            });
+        }
+
+        const { data, error } = await supabase
+            .from("businesses")
+            .update(updates)
+            .eq("id", id)
+            .select()
+            .single();
+
+        if (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Database error",
+                detail: error.message
+            });
+        }
+
+        res.json({
+            success: true,
+            business: data
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+
+    }
+
+});
+
+
+app.delete("/api/admin/businesses/:id", requireAdmin, async (req, res) => {
+
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from("businesses")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Database error",
+                detail: error.message
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Business deleted"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+
+    }
+
+});
+
+
+app.patch("/api/admin/businesses/:id/status", requireAdmin, async (req, res) => {
+
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+
+        const { id } = req.params;
+
+        const { is_active } = req.body;
+
+        if (typeof is_active !== "boolean") {
+            return res.status(400).json({
+                success: false,
+                message: "is_active must be boolean"
+            });
+        }
+
+        const { data, error } = await supabase
+            .from("businesses")
+            .update({ is_active })
+            .eq("id", id)
+            .select()
+            .single();
+
+        if (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Database error",
+                detail: error.message
+            });
+        }
+
+        res.json({
+            success: true,
+            business: data
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+
+    }
+
+});
+
+
+app.get("/api/admin/businesses", requireAdmin, async (req, res) => {
+
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+
+        let query = supabase
+            .from("businesses")
+            .select("*")
+            .order("id", { ascending: false });
+
+        if (req.query.city) {
+            query = query.eq("city", req.query.city);
+        }
+
+        if (req.query.category) {
+            query = query.eq("category", req.query.category);
+        }
+
+        if (req.query.search) {
+            query = query.ilike("name", `%${req.query.search}%`);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Database error",
+                detail: error.message
+            });
+        }
+
+        res.json({
+            success: true,
+            count: data.length,
+            businesses: data
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
         });
 
     }
