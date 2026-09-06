@@ -503,39 +503,168 @@ function openCategory(name) {
   document.getElementById("pageTitle").textContent = name;
 }
 
-function openServices(sub) {
+async function openServices(sub) {
   currentSub = sub;
 
   const box = document.getElementById("services");
-  box.innerHTML = "";
 
-  const specialist = data[currentCategory].subs[sub][0];
-
-  for (let i = 1; i <= 3; i++) {
-    const item = document.createElement("div");
-    item.className = "service";
-
-    item.innerHTML = `
-      <div class="service-top">
-        <div>
-          <div class="service-name">${specialist} ${i}</div>
-          <div class="service-specialist">${data[currentCategory].subs[sub][1]}</div>
-          <div class="verified">متخصص ثبت‌شده</div>
-        </div>
-      </div>
-      <button class="service-action" onclick="requestService('${sub}', ${i})">
-        درخواست خدمت
-      </button>
-    `;
-
-    box.appendChild(item);
-  }
+  box.innerHTML = `
+    <div style="text-align:center;padding:30px">
+      ⏳ در حال دریافت خدمات...
+    </div>
+  `;
 
   document.getElementById("categories").style.display = "none";
   document.getElementById("subcategories").style.display = "none";
   box.style.display = "grid";
   box.style.gridTemplateColumns = "1fr";
+  document.getElementById("backBtn").style.display = "block";
   document.getElementById("pageTitle").textContent = sub;
+
+  const city =
+    localStorage.getItem("forichi_city") ||
+    document.querySelector(".city-btn").textContent.trim() ||
+    "چابهار";
+
+  try {
+    const url =
+      `/api/businesses?city=${encodeURIComponent(city)}&category=${encodeURIComponent(sub)}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const result = await response.json();
+
+    const businesses = result.businesses || [];
+
+    box.innerHTML = "";
+
+    if (!businesses.length) {
+      box.innerHTML = `
+        <div style="text-align:center;padding:35px 20px">
+          <div style="font-size:42px">😕</div>
+          <h3>خدمتی پیدا نشد</h3>
+          <p>
+            در حال حاضر برای «${sub}» در «${city}»
+            کسب‌وکاری ثبت نشده است.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    businesses.forEach((business) => {
+      const item = document.createElement("div");
+      item.className = "service";
+
+      const phone = business.phone || "";
+      const address = business.address || "آدرس ثبت نشده";
+      const description = business.description || business.category || "";
+
+      item.innerHTML = `
+        <div class="service-top">
+          <div style="width:100%">
+            <div class="service-name">
+              ${business.name || "بدون نام"}
+            </div>
+
+            <div class="service-specialist">
+              ${description}
+            </div>
+
+            <div class="verified">
+              ✓ ${business.city || city}
+            </div>
+
+            <div style="margin-top:8px;font-size:13px">
+              📍 ${address}
+            </div>
+
+            ${
+              phone
+                ? `
+                <div style="margin-top:6px;font-size:13px">
+                  📞 ${phone}
+                </div>
+                `
+                : ""
+            }
+          </div>
+        </div>
+
+        <div style="
+          display:flex;
+          gap:8px;
+          margin-top:12px;
+          flex-wrap:wrap;
+        ">
+
+          ${
+            phone
+              ? `
+              <a
+                href="tel:${phone}"
+                class="service-action"
+                style="text-decoration:none;text-align:center;flex:1">
+                📞 تماس
+              </a>
+              `
+              : ""
+          }
+
+          <button
+            class="service-action"
+            style="flex:1"
+            onclick='requestService(${JSON.stringify(sub)}, ${business.id})'>
+            درخواست خدمت
+          </button>
+
+          <button
+            class="service-action"
+            style="flex:1"
+            onclick='openBusinessMap(${JSON.stringify(business)})'>
+            🗺️ نقشه
+          </button>
+
+        </div>
+      `;
+
+      box.appendChild(item);
+    });
+
+  } catch (error) {
+    console.error("ForiChi businesses error:", error);
+
+    box.innerHTML = `
+      <div style="text-align:center;padding:35px 20px">
+        <div style="font-size:42px">⚠️</div>
+        <h3>خطا در دریافت خدمات</h3>
+        <p>لطفاً دوباره تلاش کنید.</p>
+
+        <button
+          class="service-action"
+          onclick="openServices(${JSON.stringify(sub)})">
+          🔄 تلاش مجدد
+        </button>
+      </div>
+    `;
+  }
+}
+
+function openBusinessMap(business) {
+  const query =
+    business.latitude && business.longitude
+      ? `${business.latitude},${business.longitude}`
+      : `${business.address || ""}, ${business.city || ""}`;
+
+  const url =
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(query);
+
+  window.open(url, "_blank");
 }
 
 function goBack() {
@@ -598,10 +727,34 @@ function requestService(sub, number) {
 }
 
 function changeCity() {
-  const city = prompt("شهر مورد نظر را وارد کنید:", "چابهار");
+  const cities = ["چابهار", "کنارک"];
 
-  if (city) {
-    document.querySelector(".city-btn").textContent = city;
+  const message =
+    "🏙️ شهر مورد نظر را انتخاب کنید:\n\n" +
+    cities.map((city, i) => `${i + 1}. ${city}`).join("\n") +
+    "\n\nشماره شهر را وارد کنید:";
+
+  const choice = prompt(message, "1");
+
+  if (!choice) return;
+
+  let city = null;
+
+  if (choice.trim() === "1") {
+    city = "چابهار";
+  } else if (choice.trim() === "2") {
+    city = "کنارک";
+  } else {
+    alert("❌ انتخاب نامعتبر است.");
+    return;
+  }
+
+  document.querySelector(".city-btn").textContent = city;
+
+  localStorage.setItem("forichi_city", city);
+
+  if (typeof loadServices === "function") {
+    loadServices(city);
   }
 }
 
