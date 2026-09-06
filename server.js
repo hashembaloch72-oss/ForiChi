@@ -354,6 +354,35 @@ app.get("/api/admin/stats", async (req, res) => {
 });
 
 // ==================================================
+// Admin Login
+// ==================================================
+
+app.post("/api/admin/login", (req, res) => {
+
+    const { password } = req.body;
+
+    if (!process.env.FORICHI_ADMIN_KEY) {
+        return res.status(500).json({
+            success: false,
+            message: "Admin key is not configured"
+        });
+    }
+
+    if (!password || password !== process.env.FORICHI_ADMIN_KEY) {
+        return res.status(401).json({
+            success: false,
+            message: "رمز مدیر اشتباه است"
+        });
+    }
+
+    res.json({
+        success: true,
+        message: "ورود مدیر موفق بود"
+    });
+
+});
+
+// ==================================================
 // Admin - Businesses CRUD
 // ==================================================
 
