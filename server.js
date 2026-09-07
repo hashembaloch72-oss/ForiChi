@@ -197,6 +197,188 @@ app.get("/api/health", async (req, res) => {
 // Services API
 // ==================================================
 
+
+// ============================================================
+// ForiChi Map API
+// دریافت خدمات نزدیک یک موقعیت جغرافیایی
+// ============================================================
+
+app.get("/api/map/services", async (req, res) => {
+
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+
+        const latitude = Number(req.query.latitude);
+        const longitude = Number(req.query.longitude);
+        const radius = Number(req.query.radius || 20);
+
+        if (
+            !Number.isFinite(latitude) ||
+            latitude < -90 ||
+            latitude > 90
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "latitude نامعتبر است"
+            });
+        }
+
+        if (
+            !Number.isFinite(longitude) ||
+            longitude < -180 ||
+            longitude > 180
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "longitude نامعتبر است"
+            });
+        }
+
+        const safeRadius =
+            Number.isFinite(radius)
+                ? Math.min(Math.max(radius, 1), 100)
+                : 20;
+
+        const { data: services, error } = await supabase
+            .from("services")
+            .select(`
+                id,
+                specialist_id,
+                title,
+                category,
+                subcategory,
+                description,
+                price,
+                price_type,
+                city,
+                latitude,
+                longitude,
+                specialists (
+                    id,
+                    name,
+                    specialty,
+                    city,
+                    status,
+                    is_active
+                )
+            `)
+            .eq("is_active", true)
+            .not("latitude", "is", null)
+            .not("longitude", "is", null);
+
+        if (error) {
+            console.error("Map services error:", error);
+
+            return res.status(500).json({
+                success: false,
+                message: "خطا در دریافت خدمات نقشه"
+            });
+        }
+
+        const earthRadiusKm = 6371;
+
+        const toRadians = value =>
+            value * Math.PI / 180;
+
+        const result = (services || [])
+            .filter(service => {
+
+                const specialist =
+                    service.specialists;
+
+                if (
+                    !specialist ||
+                    specialist.status !== "approved" ||
+                    specialist.is_active !== true
+                ) {
+                    return false;
+                }
+
+                const lat1 =
+                    toRadians(latitude);
+
+                const lat2 =
+                    toRadians(Number(service.latitude));
+
+                const dLat =
+                    toRadians(
+                        Number(service.latitude) -
+                        latitude
+                    );
+
+                const dLon =
+                    toRadians(
+                        Number(service.longitude) -
+                        longitude
+                    );
+
+                const a =
+                    Math.sin(dLat / 2) ** 2 +
+                    Math.cos(lat1) *
+                    Math.cos(lat2) *
+                    Math.sin(dLon / 2) ** 2;
+
+                const distance =
+                    earthRadiusKm *
+                    2 *
+                    Math.atan2(
+                        Math.sqrt(a),
+                        Math.sqrt(1 - a)
+                    );
+
+                service.distance_km =
+                    Math.round(distance * 10) / 10;
+
+                return distance <= safeRadius;
+
+            })
+            .sort(
+                (a, b) =>
+                    a.distance_km -
+                    b.distance_km
+            )
+            .map(service => ({
+                id: service.id,
+                specialist_id: service.specialist_id,
+                title: service.title,
+                category: service.category,
+                subcategory: service.subcategory,
+                description: service.description,
+                price: service.price,
+                price_type: service.price_type,
+                city: service.city,
+                latitude: service.latitude,
+                longitude: service.longitude,
+                distance_km: service.distance_km,
+                specialist: service.specialists
+            }));
+
+        return res.json({
+            success: true,
+            latitude,
+            longitude,
+            radius_km: safeRadius,
+            count: result.length,
+            services: result
+        });
+
+    } catch (error) {
+
+        console.error("Map API error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "خطای سرور"
+        });
+    }
+});
+
 app.get("/api/services", async (req, res) => {
 
     if (!supabase) {
