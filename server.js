@@ -1215,6 +1215,140 @@ app.patch("/api/user/orders/:id/cancel", requireUser, async (req, res) => {
     }
 });
 
+app.post("/api/user/reviews", requireUser, async (req, res) => {
+    if (!supabase) {
+        return res.status(500).json({
+            success: false,
+            message: "Supabase is not configured"
+        });
+    }
+
+    try {
+        const orderId = Number(req.body.order_id);
+        const rating = Number(req.body.rating);
+
+        const comment =
+            typeof req.body.comment === "string"
+                ? req.body.comment.trim()
+                : null;
+
+        if (!Number.isInteger(orderId) || orderId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "شناسه سفارش معتبر نیست"
+            });
+        }
+
+        if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: "امتیاز باید بین ۱ تا ۵ باشد"
+            });
+        }
+
+        if (comment && comment.length > 1000) {
+            return res.status(400).json({
+                success: false,
+                message: "متن نظر بیش از حد طولانی است"
+            });
+        }
+
+        const { data: user, error: userError } = await supabase
+            .from("users")
+            .select("id")
+            .eq("phone", req.userPhone)
+            .maybeSingle();
+
+        if (userError || !user) {
+            return res.status(404).json({
+                success: false,
+                message: "کاربر پیدا نشد"
+            });
+        }
+
+        const { data: order, error: orderError } = await supabase
+            .from("orders")
+            .select("id, user_id, specialist_id, status")
+            .eq("id", orderId)
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        if (orderError) {
+            return res.status(500).json({
+                success: false,
+                message: "خطا در دریافت سفارش"
+            });
+        }
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "سفارش پیدا نشد"
+            });
+        }
+
+        if (order.status !== "completed") {
+            return res.status(400).json({
+                success: false,
+                message: "فقط سفارش تکمیل‌شده قابل امتیازدهی است"
+            });
+        }
+
+        const { data: existingReview, error: existingError } = await supabase
+            .from("reviews")
+            .select("id")
+            .eq("order_id", order.id)
+            .maybeSingle();
+
+        if (existingError) {
+            return res.status(500).json({
+                success: false,
+                message: "خطا در بررسی امتیاز قبلی"
+            });
+        }
+
+        if (existingReview) {
+            return res.status(409).json({
+                success: false,
+                message: "این سفارش قبلاً امتیازدهی شده است"
+            });
+        }
+
+        const { data: review, error: reviewError } = await supabase
+            .from("reviews")
+            .insert({
+                order_id: order.id,
+                user_id: user.id,
+                specialist_id: order.specialist_id,
+                rating,
+                comment: comment || null
+            })
+            .select("*")
+            .single();
+
+        if (reviewError) {
+            return res.status(500).json({
+                success: false,
+                message: "خطا در ثبت امتیاز"
+            });
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "امتیاز و نظر با موفقیت ثبت شد",
+            review
+        });
+
+    } catch (error) {
+        console.error("Create review error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "خطای سرور"
+        });
+    }
+});
+
 app.post("/api/user/orders", requireUser, async (req, res) => {
     if (!supabase) {
         return res.status(500).json({
