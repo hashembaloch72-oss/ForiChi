@@ -38,7 +38,8 @@ app.get("/api/env-status", (req, res) => {
         supabase_key: Boolean(process.env.SUPABASE_KEY),
         supabase_client: Boolean(supabase),
         node_env: process.env.NODE_ENV || "not_set",
-        user_key: Boolean(process.env.FORICHI_USER_KEY)
+        user_key: Boolean(process.env.FORICHI_USER_KEY),
+        specialist_key: Boolean(process.env.FORICHI_SPECIALIST_KEY)
     });
 });
 
